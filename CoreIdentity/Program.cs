@@ -1,4 +1,6 @@
 using CoreIdentity.Data;
+using CoreIdentity.Helpers;
+using CoreIdentity.Models.Email;
 using CoreIdentity.Models.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,8 +11,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
 });
 
-
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<EMailHelper>();
 builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>();
+
 
 
 //uilder.Services.AddDbContext<AppDbContext>(options =>

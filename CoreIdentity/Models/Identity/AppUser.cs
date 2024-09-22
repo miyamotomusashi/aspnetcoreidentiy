@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using static CoreIdentity.Models.Enums;
 
 namespace CoreIdentity.Models.Identity
 {
-  public enum Gender { Unknown, Male, Female }
-  public class AppUser : IdentityUser
+    public class AppUser : IdentityUser
   {
-        public Gender Gender { get; set; }
-        public DateTime CreatedOn { get; set; }
-    }
+    public Gender Gender { get; set; }
+    public DateTime CreatedOn { get; set; }
+    public TwoFactorType TwoFactorType { get; set; }
+    public DateTime BirthDay { get; set; }
+  }
 }
