@@ -8,23 +8,23 @@ namespace CoreIdentity.Helpers
 {
   public class EMailHelper
   {
-    private readonly EmailSettings settings;
+    private readonly EmailSettings _settings;
+
     public EMailHelper(IOptions<EmailSettings> options)
     {
-      this.settings = options.Value;
+      _settings = options.Value;
     }
 
-    public async Task SendEmail(EMailModel mailModel)
+    public async Task SendEmail(EMailModel model)
     {
-      var mail = new MailMessage()
+      var mail = new MailMessage
       {
-        Body = mailModel.Body,
-        Subject = mailModel.Subject,
-        From = new MailAddress(settings.UserName),
+        Subject = model.Subject,
+        Body = model.Body,
+        From = new MailAddress(_settings.UserName),
         IsBodyHtml = true
       };
-
-      mail.To.Add(mailModel.To);
+      mail.To.Add(model.To);
 
       var smtp = new SmtpClient
       {
@@ -33,11 +33,12 @@ namespace CoreIdentity.Helpers
         EnableSsl = true,
         DeliveryMethod = SmtpDeliveryMethod.Network,
         UseDefaultCredentials = false,
-        Credentials = new NetworkCredential(settings.UserName, settings.Password)
+        Credentials = new NetworkCredential(_settings.UserName, _settings.Password)
       };
 
-      await smtp.SendMailAsync(mail);
+    
 
+      await smtp.SendMailAsync(mail);
     }
   }
 }

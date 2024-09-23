@@ -2,6 +2,7 @@ using CoreIdentity.Data;
 using CoreIdentity.Helpers;
 using CoreIdentity.Models.Email;
 using CoreIdentity.Models.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<EMailHelper>();
-builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>()
+  .AddDefaultTokenProviders();
 
 
 

@@ -60,14 +60,72 @@ namespace CoreIdentity.Controllers
         result.Errors.ToList().ForEach(f => ModelState.AddModelError(string.Empty, f.Description));
       }
 
+
+
       return View(model);
 
     }
 
-
-    public IActionResult Index()
+    public IActionResult Login(string? returnUrl)
     {
+      if (returnUrl != null)
+      {
+        TempData["ReturnUrl"] = returnUrl;
+      }
       return View();
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Login(SignInViewModel viewModel)
+    {
+      if (ModelState.IsValid)
+      {
+        var user = await _userManager.FindByEmailAsync(viewModel.Email);
+        if (user != null)
+        {
+          await _signInManager.SignOutAsync();
+
+          var result = await _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, true);
+
+          if (result.Succeeded)
+          {
+            await _userManager.ResetAccessFailedCountAsync(user);
+            await _userManager.SetLockoutEndDateAsync(user, null);
+
+            var returnUrl = TempData["ReturnUrl"];
+            if (returnUrl != null)
+            {
+              return Redirect(returnUrl.ToString() ?? "/");
+            }
+            return RedirectToAction("Index", "Admin");
+          }
+          else if (result.RequiresTwoFactor)
+          {
+            return RedirectToAction("TwoFactorLogin", new { ReturnUrl = TempData["ReturnUrl"] });
+          }
+          else if (result.IsLockedOut)
+          {
+            var lockoutEndUtc = await _userManager.GetLockoutEndDateAsync(user);
+            var timeLeft = lockoutEndUtc.Value - DateTime.UtcNow;
+            ModelState.AddModelError(string.Empty, $"This account has been locked out, please try again {timeLeft.Minutes} minutes later.");
+          }
+          else if (result.IsNotAllowed)
+          {
+            ModelState.AddModelError(string.Empty, "You need to confirm your e-mail address.");
+          }
+          else
+          {
+            ModelState.AddModelError(string.Empty, "Invalid e-mail or password.");
+          }
+        }
+        else
+        {
+          ModelState.AddModelError(string.Empty, "Invalid e-mail or password.");
+        }
+      }
+      return View(viewModel);
+    }
+
+
   }
 }
