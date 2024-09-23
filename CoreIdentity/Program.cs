@@ -15,7 +15,24 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<EMailHelper>();
 
-builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>()
+builder.Services.AddIdentity<AppUser, AppRole>(options =>
+{
+  options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+  options.User.RequireUniqueEmail = true;
+
+  options.Password.RequireDigit = true;
+  options.Password.RequiredLength = 8;
+  options.Password.RequiredUniqueChars = 1;
+  options.Password.RequireLowercase = true;
+  options.Password.RequireUppercase = true;
+  options.Password.RequireNonAlphanumeric = false;
+
+  options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+  options.Lockout.MaxFailedAccessAttempts = 5;
+
+  options.SignIn.RequireConfirmedEmail = true;
+
+}).AddEntityFrameworkStores<AppDbContext>()
   .AddDefaultTokenProviders();
 
 
